@@ -1,0 +1,102 @@
+@model JobPortal.ViewModels.ApplicantProfileViewModel
+@{
+    ViewData["Title"] = "ملفي الشخصي";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-user-edit me-2 text-primary"></i>تعديل الملف الشخصي</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" enctype="multipart/form-data" asp-action="Profile">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">المعلومات الأساسية</h6>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">الاسم الكامل *</label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label">رقم الهاتف</label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="+966 5x xxx xxxx" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CurrentPosition" class="form-label">المسمى الوظيفي الحالي</label>
+                                <input asp-for="CurrentPosition" class="form-control" placeholder="مثال: مطور برمجيات" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="YearsOfExperience" class="form-label">سنوات الخبرة</label>
+                                <input asp-for="YearsOfExperience" class="form-control" type="number" min="0" max="50" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Bio" class="form-label">نبذة شخصية</label>
+                                <textarea asp-for="Bio" class="form-control" rows="4"
+                                          placeholder="اكتب نبذة قصيرة عن نفسك، خبراتك، وأهدافك المهنية..."></textarea>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">المهارات والروابط</h6>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="Skills" class="form-label">المهارات (مفصولة بفواصل)</label>
+                                <input asp-for="Skills" class="form-control"
+                                       placeholder="مثال: C#, ASP.NET, SQL, JavaScript, React" />
+                                <div class="text-muted small mt-1">تُستخدم لاقتراح الوظائف المناسبة لك</div>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="LinkedInUrl" class="form-label">
+                                    <i class="fab fa-linkedin me-1 text-primary"></i>رابط LinkedIn
+                                </label>
+                                <input asp-for="LinkedInUrl" class="form-control" placeholder="https://linkedin.com/in/yourprofile" />
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">السيرة الذاتية والصورة</h6>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="CvFile" class="form-label">
+                                    <i class="fas fa-file-pdf me-1 text-danger"></i>السيرة الذاتية (PDF/DOC)
+                                </label>
+                                @if (!string.IsNullOrEmpty(Model.ExistingCvPath))
+                                {
+                                    <div class="mb-2 p-2 rounded-2" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+                                        <a href="@Model.ExistingCvPath" target="_blank" class="text-success text-decoration-none small">
+                                            <i class="fas fa-file-check me-1"></i>السيرة الذاتية الحالية — عرض
+                                        </a>
+                                    </div>
+                                }
+                                <input asp-for="CvFile" class="form-control" type="file" accept=".pdf,.doc,.docx" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ProfilePicture" class="form-label">
+                                    <i class="fas fa-image me-1 text-primary"></i>الصورة الشخصية
+                                </label>
+                                <input asp-for="ProfilePicture" class="form-control" type="file" accept="image/*" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary flex-grow-1">
+                                <i class="fas fa-save me-2"></i>حفظ التغييرات
+                            </button>
+                            <a asp-action="Dashboard" class="btn btn-outline-secondary">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

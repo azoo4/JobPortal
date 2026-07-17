@@ -1,0 +1,57 @@
+@model List<JobPortal.Models.Notification>
+@{
+    ViewData["Title"] = "الإشعارات";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-bell me-2 text-primary"></i>الإشعارات (@Model.Count)</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <div class="icon fs-1">🔔</div>
+                    <h5 class="fw-bold">لا توجد إشعارات</h5>
+                    <p class="text-muted">ستظهر هنا إشعارات حالة طلباتك وتحديثاتها</p>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var n in Model)
+                    {
+                        <div class="card @(!n.IsRead ? "border-primary" : "")">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                                                background:@(n.Type == JobPortal.Models.NotificationType.ApplicationReceived ? "#eff6ff" : n.Type == JobPortal.Models.NotificationType.ApplicationStatusChanged ? "#f0fdf4" : "#f5f3ff")">
+                                        <i class="fas @(n.Type == JobPortal.Models.NotificationType.ApplicationReceived ? "fa-file-alt" : n.Type == JobPortal.Models.NotificationType.ApplicationStatusChanged ? "fa-check-circle" : "fa-bell") fa-sm"
+                                           style="color:@(n.Type == JobPortal.Models.NotificationType.ApplicationReceived ? "#2563eb" : n.Type == JobPortal.Models.NotificationType.ApplicationStatusChanged ? "#10b981" : "#7c3aed")"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold small">@n.Title</div>
+                                        <div class="text-muted small">@n.Message</div>
+                                        <div class="text-muted mt-1" style="font-size:0.72rem;">
+                                            <i class="far fa-clock me-1"></i>@n.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+                                    </div>
+                                    @if (!n.IsRead)
+                                    {
+                                        <div class="mt-1">
+                                            <span class="badge bg-primary rounded-pill" style="font-size:0.65rem;">جديد</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

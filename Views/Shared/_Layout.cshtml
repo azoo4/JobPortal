@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — بوابة العمل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+            <i class="fas fa-briefcase me-2"></i>
+            <span class="brand-text">بوابة العمل</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Jobs" asp-action="Index">
+                        <i class="fas fa-search me-1"></i> تصفح الوظائف
+                    </a>
+                </li>
+                @if (User.IsInRole("Employer"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Employer" asp-action="PostJob">
+                            <i class="fas fa-plus-circle me-1"></i> نشر وظيفة
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Employer" asp-action="MyJobs">
+                            <i class="fas fa-list-ul me-1"></i> وظائفي
+                        </a>
+                    </li>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Admin" asp-action="Dashboard">
+                            <i class="fas fa-cog me-1"></i> لوحة الإدارة
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <!-- Notifications Bell -->
+                    @if (User.IsInRole("Applicant"))
+                    {
+                        <li class="nav-item me-2">
+                            <a class="nav-link position-relative" asp-controller="Applicant" asp-action="Notifications">
+                                <i class="fas fa-bell fs-5"></i>
+                                <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger notification-count" style="display:none">0</span>
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+                            <div class="avatar-circle-sm">
+                                @(User.Identity.Name?.Substring(0, 1).ToUpper())
+                            </div>
+                            <span class="d-none d-md-inline">حسابي</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-start">
+                            @if (User.IsInRole("Applicant"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Applicant" asp-action="Dashboard"><i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم</a></li>
+                                <li><a class="dropdown-item" asp-controller="Applicant" asp-action="Profile"><i class="fas fa-user-edit me-2"></i>الملف الشخصي</a></li>
+                                <li><a class="dropdown-item" asp-controller="Applicant" asp-action="MyApplications"><i class="fas fa-file-alt me-2"></i>طلباتي</a></li>
+                                <li><a class="dropdown-item" asp-controller="Applicant" asp-action="SavedJobs"><i class="fas fa-bookmark me-2"></i>الوظائف المحفوظة</a></li>
+                            }
+                            @if (User.IsInRole("Employer"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Employer" asp-action="Dashboard"><i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم</a></li>
+                                <li><a class="dropdown-item" asp-controller="Employer" asp-action="Profile"><i class="fas fa-building me-2"></i>ملف الشركة</a></li>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard"><i class="fas fa-cog me-2"></i>لوحة الإدارة</a></li>
+                            }
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword"><i class="fas fa-key me-2"></i>تغيير كلمة المرور</a></li>
+                            <li>
+                                <form method="post" asp-controller="Account" asp-action="Logout">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="Login">
+                            <i class="fas fa-sign-in-alt me-1"></i> دخول
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-primary-custom" asp-controller="Account" asp-action="Register">
+                            <i class="fas fa-user-plus me-1"></i> تسجيل مجاني
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Toast Notifications -->
+@if (TempData["Success"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show align-items-center text-white bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="fas fa-check-circle me-2"></i>@TempData["Success"]</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show align-items-center text-white bg-danger border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Main Content -->
+<main>
+    @RenderBody()
+</main>
+
+<!-- Footer -->
+<footer class="footer-main mt-5 py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-briefcase me-2 text-primary"></i>بوابة العمل
+                </h5>
+                <p class="text-muted">منصتك الأولى للتوظيف في العالم العربي. نربط أفضل المواهب بأبرز الشركات.</p>
+            </div>
+            <div class="col-lg-2 col-6">
+                <h6 class="fw-bold mb-3">للباحثين</h6>
+                <ul class="list-unstyled">
+                    <li><a asp-controller="Jobs" asp-action="Index" class="footer-link">تصفح الوظائف</a></li>
+                    <li><a asp-controller="Account" asp-action="Register" asp-route-type="Applicant" class="footer-link">إنشاء حساب</a></li>
+                    <li><a asp-controller="Applicant" asp-action="Dashboard" class="footer-link">لوحة التحكم</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-6">
+                <h6 class="fw-bold mb-3">لأصحاب العمل</h6>
+                <ul class="list-unstyled">
+                    <li><a asp-controller="Account" asp-action="Register" asp-route-type="Employer" class="footer-link">نشر وظيفة</a></li>
+                    <li><a asp-controller="Employer" asp-action="Dashboard" class="footer-link">إدارة الوظائف</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="fw-bold mb-3">API للمطورين</h6>
+                <p class="text-muted small">نوفر REST API كاملة للتكامل مع منصتنا</p>
+                <a href="/api-docs" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-code me-1"></i> توثيق API
+                </a>
+            </div>
+        </div>
+        <hr class="my-4">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-muted small">
+                © @DateTime.Now.Year بوابة العمل — جميع الحقوق محفوظة
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+
+<script>
+    // Auto-dismiss toasts
+    document.querySelectorAll('.toast').forEach(t => {
+        setTimeout(() => new bootstrap.Toast(t).hide(), 4000);
+    });
+</script>
+</body>
+</html>

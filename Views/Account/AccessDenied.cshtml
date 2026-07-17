@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "غير مصرح";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #0f172a, #1e293b);">
+    <div class="text-center text-white p-4">
+        <div style="font-size:6rem; margin-bottom:20px;">🚫</div>
+        <h1 class="fw-bold mb-3">غير مصرح</h1>
+        <p class="text-muted mb-4">ليس لديك صلاحية للوصول إلى هذه الصفحة.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+            <i class="fas fa-home me-2"></i>العودة للرئيسية
+        </a>
+    </div>
+</div>

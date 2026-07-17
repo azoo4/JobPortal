@@ -1,0 +1,121 @@
+@model JobPortal.ViewModels.EmployerDashboardViewModel
+@{
+    ViewData["Title"] = "لوحة تحكم صاحب العمل";
+}
+
+<div class="page-header">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3">
+            <div class="company-logo" style="width:56px;height:56px;font-size:1.5rem;">
+                @(Model.User.CompanyName?.Substring(0,1)?.ToUpper() ?? "C")
+            </div>
+            <div>
+                <h1 class="mb-1">@(Model.User.CompanyName ?? Model.User.FullName)</h1>
+                <p class="text-muted mb-0">@(Model.User.Industry ?? "صاحب عمل") — @Model.User.Email</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        @foreach (var stat in new[] {
+            new { label="إجمالي الوظائف", value=Model.TotalJobs.ToString(), icon="fas fa-briefcase", cls="ds-blue" },
+            new { label="وظائف نشطة", value=Model.ActiveJobs.Count.ToString(), icon="fas fa-check-circle", cls="ds-green" },
+            new { label="إجمالي الطلبات", value=Model.TotalApplications.ToString(), icon="fas fa-users", cls="ds-purple" },
+            new { label="طلبات جديدة", value=Model.NewApplications.ToString(), icon="fas fa-bell", cls="ds-orange" }
+        })
+        {
+            <div class="col-6 col-md-3">
+                <div class="dashboard-stat-card @stat.cls">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div style="font-size:2rem;font-weight:900">@stat.value</div>
+                            <div style="opacity:0.8;font-size:0.9rem">@stat.label</div>
+                        </div>
+                        <i class="@stat.icon fa-xl opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-4">
+        <!-- Active Jobs -->
+        <div class="col-lg-7">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-briefcase me-2 text-primary"></i>الوظائف النشطة</h6>
+                    <div class="d-flex gap-2">
+                        <a asp-action="PostJob" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i>نشر وظيفة
+                        </a>
+                        <a asp-action="MyJobs" class="btn btn-sm btn-outline-secondary">عرض الكل</a>
+                    </div>
+                </div>
+                @if (!Model.ActiveJobs.Any())
+                {
+                    <div class="empty-state py-4">
+                        <div class="icon fs-1">💼</div>
+                        <p class="text-muted">لم تنشر أي وظائف بعد</p>
+                        <a asp-action="PostJob" class="btn btn-primary btn-sm">نشر أول وظيفة</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var job in Model.ActiveJobs.Take(5))
+                    {
+                        <div class="d-flex align-items-center gap-3 p-3 mb-2 rounded-3" style="background:#f8fafc;">
+                            <div class="flex-grow-1">
+                                <div class="fw-bold small">@job.Title</div>
+                                <div class="text-muted" style="font-size:0.78rem;">
+                                    @job.Location • @job.JobType.GetDisplayName() •
+                                    <span class="text-primary">@job.Applications.Count طلب</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1">
+                                <a asp-action="Applications" asp-route-jobId="@job.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-users"></i>
+                                </a>
+                                <a asp-action="EditJob" asp-route-id="@job.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Recent Applications -->
+        <div class="col-lg-5">
+            <div class="dashboard-card">
+                <h6 class="fw-bold mb-3"><i class="fas fa-clock me-2 text-primary"></i>آخر الطلبات</h6>
+                @if (!Model.RecentApplications.Any())
+                {
+                    <p class="text-muted text-center py-4">لا توجد طلبات بعد</p>
+                }
+                else
+                {
+                    @foreach (var app in Model.RecentApplications.Take(6))
+                    {
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="avatar-circle-sm">
+                                @(app.Applicant?.FullName?.Substring(0,1)?.ToUpper() ?? "?")
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-bold small text-truncate">@app.Applicant?.FullName</div>
+                                <div class="text-muted" style="font-size:0.75rem;">@app.Job?.Title</div>
+                            </div>
+                            <span class="status-badge status-@app.Status.ToString().ToLower()" style="font-size:0.7rem;">
+                                @app.Status.GetDisplayName()
+                            </span>
+                        </div>
+                    }
+                    <a asp-action="Applications" asp-route-jobId="0" class="btn btn-outline-primary btn-sm w-100 mt-2">عرض كل الطلبات</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,124 @@
+@model JobPortal.ViewModels.ApplyViewModel
+@{
+    ViewData["Title"] = "التقدم للوظيفة";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1 class="mb-1"><i class="fas fa-paper-plane me-2 text-primary"></i>التقدم للوظيفة</h1>
+        <p class="text-muted mb-0">@Model.Job?.Title — @Model.Job?.Employer?.CompanyName</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" asp-action="Apply">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="JobId" />
+
+                        <!-- Cover Letter -->
+                        <div class="mb-4">
+                            <label asp-for="CoverLetter" class="form-label"></label>
+                            <textarea asp-for="CoverLetter" class="form-control" rows="6"
+                                      placeholder="اكتب رسالة تعريفية تشرح سبب اهتمامك بالوظيفة ومهاراتك المناسبة..."></textarea>
+                            <span asp-validation-for="CoverLetter" class="text-danger small"></span>
+                            <div class="text-muted small mt-1">اختياري — لكن يزيد من فرص القبول</div>
+                        </div>
+
+                        <!-- CV Section -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">السيرة الذاتية</label>
+
+                            @if (!string.IsNullOrEmpty(Model.ExistingCvPath))
+                            {
+                                <div class="p-3 rounded-3 mb-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="UseExistingCv" value="true" id="useExisting" checked>
+                                        <label class="form-check-label fw-bold text-success" for="useExisting">
+                                            <i class="fas fa-file-check me-2"></i>استخدام السيرة الذاتية الحالية
+                                        </label>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 me-4">
+                                        <i class="fas fa-file-pdf text-danger fa-lg"></i>
+                                        <a href="@Model.ExistingCvPath" target="_blank" class="text-decoration-none">عرض السيرة الذاتية</a>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="p-3 rounded-3" style="background:#f8fafc; border:1px dashed #cbd5e1;">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="UseExistingCv" value="false"
+                                           id="uploadNew" @(string.IsNullOrEmpty(Model.ExistingCvPath) ? "checked" : "")>
+                                    <label class="form-check-label fw-bold" for="uploadNew">
+                                        <i class="fas fa-upload me-2"></i>رفع سيرة ذاتية جديدة
+                                    </label>
+                                </div>
+                                <input type="file" asp-for="NewCv" class="form-control" accept=".pdf,.doc,.docx" id="cvUpload">
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    صيغ مقبولة: PDF, DOC, DOCX — الحجم الأقصى: 5MB
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary flex-grow-1 btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>إرسال الطلب
+                            </button>
+                            <a asp-controller="Jobs" asp-action="Details" asp-route-id="@Model.JobId" class="btn btn-outline-secondary btn-lg">
+                                إلغاء
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Summary Sidebar -->
+        <div class="col-lg-4">
+            @if (Model.Job != null)
+            {
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">ملخص الوظيفة</h6>
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <div class="company-logo" style="width:44px;height:44px;font-size:1rem;">
+                                @(Model.Job.Employer?.CompanyName?.Substring(0, 1)?.ToUpper() ?? "C")
+                            </div>
+                            <div>
+                                <div class="fw-bold">@Model.Job.Title</div>
+                                <div class="text-muted small">@Model.Job.Employer?.CompanyName</div>
+                            </div>
+                        </div>
+                        <ul class="list-unstyled small text-muted">
+                            <li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i>@Model.Job.Location</li>
+                            <li class="mb-2"><i class="fas fa-briefcase me-2 text-primary"></i>@Model.Job.JobType.GetDisplayName()</li>
+                            <li class="mb-2"><i class="fas fa-layer-group me-2 text-primary"></i>@Model.Job.ExperienceLevel.GetDisplayName()</li>
+                            @if (Model.Job.ShowSalary && Model.Job.SalaryMin.HasValue)
+                            {
+                                <li class="mb-2"><i class="fas fa-coins me-2 text-success"></i>
+                                    <span class="text-success fw-bold">@Model.Job.SalaryMin:N0 - @Model.Job.SalaryMax:N0 @Model.Job.SalaryCurrency</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('input[name="UseExistingCv"]').forEach(r => {
+    r.addEventListener('change', e => {
+        document.getElementById('cvUpload').disabled = e.target.value === 'true';
+    });
+});
+const useExisting = document.getElementById('useExisting');
+if (useExisting) document.getElementById('cvUpload').disabled = true;
+</script>
+}

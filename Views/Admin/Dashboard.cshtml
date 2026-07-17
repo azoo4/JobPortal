@@ -1,0 +1,102 @@
+@model JobPortal.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "لوحة الإدارة";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-cog me-2 text-primary"></i>لوحة الإدارة</h1>
+        <p class="text-muted mb-0">إحصائيات شاملة لمنصة بوابة العمل</p>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        @foreach (var s in new[] {
+            new { label="إجمالي المستخدمين", value=Model.TotalUsers, icon="fas fa-users", cls="ds-blue" },
+            new { label="أصحاب العمل", value=Model.TotalEmployers, icon="fas fa-building", cls="ds-purple" },
+            new { label="الباحثون عن عمل", value=Model.TotalApplicants, icon="fas fa-user-tie", cls="ds-green" },
+            new { label="إجمالي الوظائف", value=Model.TotalJobs, icon="fas fa-briefcase", cls="ds-orange" },
+            new { label="وظائف نشطة", value=Model.ActiveJobs, icon="fas fa-check-circle", cls="ds-green" },
+            new { label="إجمالي الطلبات", value=Model.TotalApplications, icon="fas fa-file-alt", cls="ds-blue" }
+        })
+        {
+            <div class="col-6 col-md-4 col-lg-2">
+                <div class="dashboard-stat-card @s.cls">
+                    <i class="@s.icon fa-lg d-block mb-2 opacity-75"></i>
+                    <div style="font-size:1.8rem;font-weight:900">@s.value</div>
+                    <div style="opacity:0.8;font-size:0.8rem">@s.label</div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-4">
+        <!-- Latest Users -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-user-plus me-2 text-primary"></i>آخر المستخدمين</h6>
+                    <a asp-action="Users" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                </div>
+                @foreach (var user in Model.LatestUsers)
+                {
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="avatar-circle-sm">@(user.FullName.Substring(0,1).ToUpper())</div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small">@user.FullName</div>
+                            <div class="text-muted" style="font-size:0.75rem;">@user.Email</div>
+                        </div>
+                        <div class="text-muted" style="font-size:0.75rem;">@user.CreatedAt.ToString("dd/MM/yyyy")</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Latest Jobs -->
+        <div class="col-lg-6">
+            <div class="dashboard-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-briefcase me-2 text-primary"></i>آخر الوظائف</h6>
+                    <a asp-action="Jobs" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+                </div>
+                @foreach (var job in Model.LatestJobs)
+                {
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="company-logo" style="width:36px;height:36px;font-size:0.85rem;">
+                            @(job.Employer?.CompanyName?.Substring(0,1)?.ToUpper() ?? "C")
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small">@job.Title</div>
+                            <div class="text-muted" style="font-size:0.75rem;">@job.Employer?.CompanyName • @job.Location</div>
+                        </div>
+                        <span class="badge @(job.IsActive ? "bg-success" : "bg-secondary")" style="border-radius:50px;font-size:0.7rem;">
+                            @(job.IsActive ? "نشط" : "متوقف")
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row g-3 mt-2">
+        @foreach (var link in new[] {
+            new { icon="fas fa-users", label="إدارة المستخدمين", desc="عرض وتعطيل المستخدمين", controller="Admin", action="Users", color="#2563eb" },
+            new { icon="fas fa-briefcase", label="إدارة الوظائف", desc="تمييز وحذف الوظائف", controller="Admin", action="Jobs", color="#7c3aed" },
+            new { icon="fas fa-file-alt", label="كل الطلبات", desc="استعراض طلبات التوظيف", controller="Admin", action="Applications", color="#10b981" }
+        })
+        {
+            <div class="col-md-4">
+                <a asp-controller="@link.controller" asp-action="@link.action" class="text-decoration-none">
+                    <div class="dashboard-card h-100" style="border-right:4px solid @link.color">
+                        <i class="@link.icon fa-xl mb-2" style="color:@link.color"></i>
+                        <div class="fw-bold">@link.label</div>
+                        <div class="text-muted small">@link.desc</div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>

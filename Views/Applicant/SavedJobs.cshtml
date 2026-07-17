@@ -1,0 +1,33 @@
+@model List<JobPortal.Models.SavedJob>
+@{
+    ViewData["Title"] = "الوظائف المحفوظة";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-bookmark me-2 text-warning"></i>الوظائف المحفوظة (@Model.Count)</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="icon fs-1">🔖</div>
+            <h5 class="fw-bold">لا توجد وظائف محفوظة</h5>
+            <p class="text-muted">احفظ الوظائف التي تهمك للرجوع إليها لاحقاً</p>
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">تصفح الوظائف</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var saved in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    @await Html.PartialAsync("_JobCard", saved.Job!)
+                </div>
+            }
+        </div>
+    }
+</div>

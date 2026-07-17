@@ -1,0 +1,47 @@
+@model List<JobPortal.Models.Application>
+@{
+    ViewData["Title"] = "إدارة الطلبات";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-file-alt me-2 text-primary"></i>كل الطلبات (@Model.Count)</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>المتقدم</th>
+                        <th>الوظيفة</th>
+                        <th>الشركة</th>
+                        <th>الحالة</th>
+                        <th>تاريخ التقديم</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var app in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold small">@app.Applicant?.FullName</div>
+                                <div class="text-muted" style="font-size:0.75rem;">@app.Applicant?.Email</div>
+                            </td>
+                            <td class="fw-bold small">@app.Job?.Title</td>
+                            <td class="text-muted small">@app.Job?.Employer?.CompanyName</td>
+                            <td>
+                                <span class="status-badge status-@app.Status.ToString().ToLower()">
+                                    @app.Status.GetDisplayName()
+                                </span>
+                            </td>
+                            <td class="text-muted small">@app.AppliedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

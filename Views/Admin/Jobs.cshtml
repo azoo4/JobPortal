@@ -1,0 +1,73 @@
+@model List<JobPortal.Models.Job>
+@{
+    ViewData["Title"] = "إدارة الوظائف";
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-briefcase me-2 text-primary"></i>إدارة الوظائف (@Model.Count)</h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-modern align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>الوظيفة</th>
+                        <th>الشركة</th>
+                        <th>الموقع</th>
+                        <th>الطلبات</th>
+                        <th>الحالة</th>
+                        <th>تاريخ النشر</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var job in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold small">
+                                    <a asp-controller="Jobs" asp-action="Details" asp-route-id="@job.Id" class="text-decoration-none text-dark">
+                                        @job.Title
+                                    </a>
+                                </div>
+                                <div class="text-muted" style="font-size:0.75rem;">@job.Category</div>
+                            </td>
+                            <td class="text-muted small">@job.Employer?.CompanyName</td>
+                            <td class="text-muted small">@job.Location</td>
+                            <td><span class="badge-tag">@job.Applications.Count طلب</span></td>
+                            <td>
+                                <span class="badge @(job.IsActive ? "bg-success" : "bg-secondary")" style="border-radius:50px;font-size:0.75rem;">
+                                    @(job.IsActive ? "نشط" : "متوقف")
+                                </span>
+                                @if (job.IsFeatured) { <span class="badge bg-warning text-dark ms-1" style="border-radius:50px;font-size:0.75rem;">⭐ مميز</span> }
+                            </td>
+                            <td class="text-muted small">@job.PostedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <form method="post" asp-action="ToggleFeatured" asp-route-id="@job.Id" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-@(job.IsFeatured ? "secondary" : "warning")"
+                                                title="@(job.IsFeatured ? "إلغاء التمييز" : "تمييز")">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" asp-action="DeleteJob" asp-route-id="@job.Id" class="d-inline"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف هذه الوظيفة؟')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="حذف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

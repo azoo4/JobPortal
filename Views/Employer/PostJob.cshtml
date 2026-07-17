@@ -1,0 +1,140 @@
+@model JobPortal.Models.Job
+@{
+    ViewData["Title"] = Model.Id == 0 ? "نشر وظيفة جديدة" : "تعديل الوظيفة";
+    bool isEdit = Model.Id != 0;
+}
+
+<div class="page-header">
+    <div class="container">
+        <h1>
+            <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle") me-2 text-primary"></i>
+            @(isEdit ? "تعديل الوظيفة" : "نشر وظيفة جديدة")
+        </h1>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" asp-action="@(isEdit ? "EditJob" : "PostJob")">
+                        @Html.AntiForgeryToken()
+                        @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                        <!-- Basic Info -->
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">المعلومات الأساسية</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="Title" class="form-label">عنوان الوظيفة *</label>
+                                <input asp-for="Title" class="form-control form-control-lg" placeholder="مثال: مطور .NET متقدم" />
+                                <span asp-validation-for="Title" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label">المجال / القطاع *</label>
+                                <select asp-for="Category" class="form-select">
+                                    <option value="">اختر المجال</option>
+                                    @foreach (var cat in new[] { "تطوير البرمجيات", "تطوير الويب", "تطوير الجوال", "تحليل البيانات", "الذكاء الاصطناعي", "الأمن السيبراني", "تصميم UI/UX", "التصميم الجرافيكي", "إدارة المشاريع", "التسويق الرقمي", "المحاسبة والمالية", "الموارد البشرية", "الهندسة", "التعليم", "الرعاية الصحية", "أخرى" })
+                                    {
+                                        <option value="@cat" selected="@(Model.Category == cat)">@cat</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Location" class="form-label">موقع العمل *</label>
+                                <input asp-for="Location" class="form-control" placeholder="مثال: الرياض، السعودية" />
+                                <span asp-validation-for="Location" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="JobType" class="form-label">نوع الوظيفة *</label>
+                                <select asp-for="JobType" asp-items="Html.GetEnumSelectList<JobPortal.Models.JobType>()" class="form-select"></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ExperienceLevel" class="form-label">مستوى الخبرة</label>
+                                <select asp-for="ExperienceLevel" asp-items="Html.GetEnumSelectList<JobPortal.Models.ExperienceLevel>()" class="form-select"></select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" asp-for="IsRemote" type="checkbox" />
+                                    <label class="form-check-label" asp-for="IsRemote">تتيح العمل عن بُعد</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Salary -->
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">الراتب</h6>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="SalaryMin" class="form-label">الحد الأدنى</label>
+                                <input asp-for="SalaryMin" class="form-control" type="number" placeholder="5000" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="SalaryMax" class="form-label">الحد الأعلى</label>
+                                <input asp-for="SalaryMax" class="form-control" type="number" placeholder="10000" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="SalaryCurrency" class="form-label">العملة</label>
+                                <select asp-for="SalaryCurrency" class="form-select">
+                                    @foreach (var c in new[] { "SAR", "AED", "USD", "JOD", "EGP", "KWD", "QAR" })
+                                    {
+                                        <option value="@c" selected="@(Model.SalaryCurrency == c)">@c</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" asp-for="ShowSalary" type="checkbox" />
+                                    <label class="form-check-label" asp-for="ShowSalary">إظهار الراتب للمتقدمين</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <h6 class="fw-bold text-muted mb-3 border-bottom pb-2">تفاصيل الوظيفة</h6>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">وصف الوظيفة *</label>
+                            <textarea asp-for="Description" class="form-control" rows="6"
+                                      placeholder="اكتب وصفاً شاملاً للوظيفة، بيئة العمل، والفرق المتاحة..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Requirements" class="form-label">المتطلبات والمؤهلات *</label>
+                            <textarea asp-for="Requirements" class="form-control" rows="5"
+                                      placeholder="اكتب كل متطلب في سطر منفصل&#10;خبرة 3 سنوات في C#&#10;إتقان SQL Server&#10;..."></textarea>
+                            <span asp-validation-for="Requirements" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Responsibilities" class="form-label">المهام والمسؤوليات</label>
+                            <textarea asp-for="Responsibilities" class="form-control" rows="4"
+                                      placeholder="اكتب المهام الرئيسية المتوقعة من المرشح..."></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label asp-for="Skills" class="form-label">المهارات التقنية المطلوبة</label>
+                            <input asp-for="Skills" class="form-control"
+                                   placeholder="مثال: C#, ASP.NET Core, SQL Server, React (مفصولة بفواصل)" />
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="ExpiresAt" class="form-label">تاريخ انتهاء الإعلان</label>
+                                <input asp-for="ExpiresAt" class="form-control" type="date"
+                                       value="@(Model.ExpiresAt?.ToString("yyyy-MM-dd") ?? "")" />
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary flex-grow-1 btn-lg">
+                                <i class="fas @(isEdit ? "fa-save" : "fa-paper-plane") me-2"></i>
+                                @(isEdit ? "حفظ التغييرات" : "نشر الوظيفة")
+                            </button>
+                            <a asp-action="MyJobs" class="btn btn-outline-secondary btn-lg">إلغاء</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

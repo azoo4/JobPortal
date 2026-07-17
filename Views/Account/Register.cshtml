@@ -1,0 +1,158 @@
+@model JobPortal.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "إنشاء حساب جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-vh-100 d-flex align-items-center py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="text-center mb-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                        <span style="font-size:1.8rem; font-weight:900; background:linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                            <i class="fas fa-briefcase me-2" style="-webkit-text-fill-color:#60a5fa"></i>بوابة العمل
+                        </span>
+                    </a>
+                    <h2 class="text-white mt-3 fw-bold">أنشئ حسابك مجاناً</h2>
+                    <p class="text-muted">انضم إلى آلاف المستخدمين على منصتنا</p>
+                </div>
+
+                <div class="card" style="border-radius:20px;">
+                    <div class="card-body p-4 p-md-5">
+
+                        <!-- Account Type Selector -->
+                        <div class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="accountTypeRadio" id="typeApplicant" value="Applicant"
+                                           @(Model.AccountType != "Employer" ? "checked" : "")>
+                                    <label class="btn w-100 p-3 account-type-btn" for="typeApplicant" style="border-radius:14px; border:2px solid #e2e8f0; text-align:center;">
+                                        <i class="fas fa-user-tie fa-2x d-block mb-2 text-primary"></i>
+                                        <div class="fw-bold">باحث عن عمل</div>
+                                        <div class="text-muted small">أبحث عن فرص عمل</div>
+                                    </label>
+                                </div>
+                                <div class="col-6">
+                                    <input type="radio" class="btn-check" name="accountTypeRadio" id="typeEmployer" value="Employer"
+                                           @(Model.AccountType == "Employer" ? "checked" : "")>
+                                    <label class="btn w-100 p-3 account-type-btn" for="typeEmployer" style="border-radius:14px; border:2px solid #e2e8f0; text-align:center;">
+                                        <i class="fas fa-building fa-2x d-block mb-2 text-purple" style="color:#7c3aed"></i>
+                                        <div class="fw-bold">صاحب عمل</div>
+                                        <div class="text-muted small">أبحث عن موظفين</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form asp-action="Register" method="post" id="registerForm">
+                            @Html.AntiForgeryToken()
+                            <input asp-for="AccountType" type="hidden" id="accountTypeHidden" />
+
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="FullName" class="form-label"></label>
+                                <input asp-for="FullName" class="form-control" placeholder="الاسم الكامل" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Employer Fields -->
+                            <div id="employerFields" style="display:@(Model.AccountType == "Employer" ? "block" : "none")">
+                                <div class="mb-3">
+                                    <label asp-for="CompanyName" class="form-label"></label>
+                                    <input asp-for="CompanyName" class="form-control" placeholder="اسم الشركة أو المؤسسة" />
+                                    <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Industry" class="form-label"></label>
+                                    <select asp-for="Industry" class="form-select">
+                                        <option value="">اختر القطاع</option>
+                                        @foreach (var ind in new[] { "تكنولوجيا المعلومات", "تطوير البرمجيات", "التصميم والإبداع", "التسويق الرقمي", "المحاسبة والمالية", "الهندسة", "الرعاية الصحية", "التعليم", "التجزئة والبيع", "البناء والعقارات", "أخرى" })
+                                        {
+                                            <option value="@ind">@ind</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Password" class="form-control" placeholder="8 أحرف على الأقل" id="regPassword" />
+                                    <button type="button" class="btn btn-outline-secondary" onclick="toggleReg()">
+                                        <i class="fas fa-eye" id="regEye"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                                <div id="passwordStrength" class="mt-1"></div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <input asp-for="ConfirmPassword" class="form-control" placeholder="أعد كتابة كلمة المرور" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold">
+                                <i class="fas fa-user-plus me-2"></i>إنشاء الحساب
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+                        <p class="text-center mb-0 text-muted">
+                            لديك حساب بالفعل؟
+                            <a asp-controller="Account" asp-action="Login" class="fw-bold text-primary text-decoration-none">سجّل دخولك</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('input[name="accountTypeRadio"]').forEach(r => {
+    r.addEventListener('change', e => {
+        document.getElementById('accountTypeHidden').value = e.target.value;
+        document.getElementById('employerFields').style.display = e.target.value === 'Employer' ? 'block' : 'none';
+    });
+});
+
+// Set initial hidden value
+const checked = document.querySelector('input[name="accountTypeRadio"]:checked');
+if (checked) document.getElementById('accountTypeHidden').value = checked.value;
+
+function toggleReg() {
+    const inp = document.getElementById('regPassword');
+    const icon = document.getElementById('regEye');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+
+document.getElementById('regPassword').addEventListener('input', function() {
+    const v = this.value;
+    const bar = document.getElementById('passwordStrength');
+    let strength = 0;
+    if (v.length >= 8) strength++;
+    if (/[A-Z]/.test(v)) strength++;
+    if (/[0-9]/.test(v)) strength++;
+    if (/[^A-Za-z0-9]/.test(v)) strength++;
+    const labels = ['', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'];
+    const colors = ['', '#ef4444', '#f59e0b', '#3b82f6', '#10b981'];
+    bar.innerHTML = v ? `<div class="d-flex align-items-center gap-2 mt-1">
+        <div style="flex:1;height:4px;background:#e2e8f0;border-radius:2px;">
+            <div style="width:${strength*25}%;height:100%;background:${colors[strength]};border-radius:2px;transition:all .3s"></div>
+        </div>
+        <span style="font-size:.75rem;color:${colors[strength]}">${labels[strength]}</span>
+    </div>` : '';
+});
+</script>
+}

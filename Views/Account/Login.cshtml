@@ -1,0 +1,111 @@
+@model JobPortal.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-vh-100 d-flex align-items-center py-5" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="text-center mb-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                        <span style="font-size:2rem; font-weight:900; background:linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+                            <i class="fas fa-briefcase me-2" style="-webkit-text-fill-color:#60a5fa"></i>بوابة العمل
+                        </span>
+                    </a>
+                    <h2 class="text-white mt-3 fw-bold">أهلاً بعودتك!</h2>
+                    <p class="text-muted">سجّل دخولك للوصول إلى حسابك</p>
+                </div>
+
+                <div class="card" style="border-radius:20px;">
+                    <div class="card-body p-4 p-md-5">
+                        <form asp-action="Login" method="post">
+                            @Html.AntiForgeryToken()
+                       <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-3" role="alert"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="border-radius:10px 0 0 10px;"><i class="fas fa-envelope text-muted"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="example@email.com" style="border-radius:0 10px 10px 0;">
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="border-radius:10px 0 0 10px;"><i class="fas fa-lock text-muted"></i></span>
+                                    <input asp-for="Password" class="form-control" placeholder="••••••••" id="passwordInput" style="border-radius:0 10px 10px 0;">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()" style="border-radius:0 10px 10px 0;">
+                                        <i class="fas fa-eye" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" asp-for="RememberMe" type="checkbox">
+                                    <label class="form-check-label small" asp-for="RememberMe"></label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-lg fw-bold">
+                                <i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+                        <p class="text-center mb-0 text-muted">
+                            ليس لديك حساب؟
+                            <a asp-controller="Account" asp-action="Register" class="fw-bold text-primary text-decoration-none">
+                                سجّل مجاناً
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Demo accounts -->
+                <div class="card mt-3" style="border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1)">
+                    <div class="card-body p-3">
+                        <div class="text-white small fw-bold mb-2 text-center">حسابات تجريبية</div>
+                        <div class="row g-2">
+                            @foreach (var acc in new[] {
+                                new { label="مدير", email="admin@jobportal.com", pass="Admin@123456", color="#ef4444" },
+                                new { label="صاحب عمل", email="employer@tech.com", pass="Employer@123456", color="#f59e0b" },
+                                new { label="باحث عمل", email="applicant@gmail.com", pass="Applicant@123456", color="#10b981" }
+                            })
+                            {
+                                <div class="col-4 text-center">
+                                    <button class="btn btn-sm w-100 py-1" onclick="fillLogin('@acc.email','@acc.pass')"
+                                            style="background:rgba(255,255,255,0.08); color:@acc.color; border:1px solid @acc.color; border-radius:8px; font-size:0.75rem;">
+                                        @acc.label
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function togglePassword() {
+    const inp = document.getElementById('passwordInput');
+    const icon = document.getElementById('eyeIcon');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+function fillLogin(email, pass) {
+    document.getElementById('Email').value = email;
+    document.getElementById('passwordInput').value = pass;
+}
+</script>
+}

@@ -1,0 +1,267 @@
+@model JobPortal.Models.Job
+@{
+    ViewData["Title"] = Model.Title;
+    bool alreadyApplied = (bool)(ViewBag.AlreadyApplied ?? false);
+    bool isSaved = (bool)(ViewBag.IsSaved ?? false);
+    var related = ViewBag.RelatedJobs as List<JobPortal.Models.Job> ?? new();
+}
+
+<div class="page-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-3">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-muted">الرئيسية</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Jobs" asp-action="Index" class="text-muted">الوظائف</a></li>
+                <li class="breadcrumb-item active text-white">@Model.Title</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-start gap-4">
+            <div class="company-logo" style="width:72px;height:72px;font-size:1.8rem;">
+                @(Model.Employer?.CompanyName?.Substring(0, 1)?.ToUpper() ?? "C")
+            </div>
+            <div>
+                <h1 class="mb-1">@Model.Title</h1>
+                <div class="text-muted">
+                    <i class="fas fa-building me-1"></i> @(Model.Employer?.CompanyName ?? "—")
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-map-marker-alt me-1"></i> @Model.Location
+                    @if (Model.IsRemote) { <span class="badge bg-success ms-1">عن بعد</span> }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <div class="row g-4">
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+
+            <!-- Quick Info -->
+            <div class="card mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small mb-1">نوع الوظيفة</div>
+                            <div class="fw-bold">@Model.JobType.GetDisplayName()</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small mb-1">مستوى الخبرة</div>
+                            <div class="fw-bold">@Model.ExperienceLevel.GetDisplayName()</div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="text-muted small mb-1">المجال</div>
+                            <div class="fw-bold">@Model.Category</div>
+                        </div>
+                        @if (Model.ShowSalary && (Model.SalaryMin.HasValue || Model.SalaryMax.HasValue))
+                        {
+                            <div class="col-6 col-md-3">
+                                <div class="text-muted small mb-1">الراتب</div>
+                                <div class="salary-text fw-bold">
+                                    @if (Model.SalaryMin.HasValue && Model.SalaryMax.HasValue)
+                                    { @($"{Model.SalaryMin:N0} - {Model.SalaryMax:N0}") }
+                                    else
+                                    { @($"حتى {Model.SalaryMax:N0}") }
+                                    <small>@Model.SalaryCurrency</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="card mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-align-right me-2 text-primary"></i>وصف الوظيفة</h5>
+                    <div style="white-space: pre-line; line-height: 1.8;">@Model.Description</div>
+                </div>
+            </div>
+
+            <!-- Requirements -->
+            <div class="card mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-list-check me-2 text-primary"></i>المتطلبات</h5>
+                    <div style="white-space: pre-line; line-height: 2;">
+                        @foreach (var req in Model.Requirements.Split('\n').Where(r => !string.IsNullOrWhiteSpace(r)))
+                        {
+                            <div class="d-flex align-items-start gap-2 mb-1">
+                                <i class="fas fa-check-circle text-success mt-1 flex-shrink-0"></i>
+                                <span>@req.Trim()</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Responsibilities))
+            {
+                <div class="card mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-tasks me-2 text-primary"></i>المهام والمسؤوليات</h5>
+                        <div style="white-space: pre-line; line-height: 2;">@Model.Responsibilities</div>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Skills))
+            {
+                <div class="card mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-code me-2 text-primary"></i>المهارات المطلوبة</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var skill in Model.Skills.Split(','))
+                            {
+                                <span class="badge-tag">@skill.Trim()</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+
+            <!-- Apply Box -->
+            <div class="card mb-4" style="position:sticky; top:80px">
+                <div class="card-body p-4">
+                    @if (User.IsInRole("Applicant"))
+                    {
+                        if (alreadyApplied)
+                        {
+                            <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-check-circle"></i>
+                                <span>لقد قدمت على هذه الوظيفة</span>
+                            </div>
+                            <a asp-controller="Applicant" asp-action="MyApplications" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-list me-1"></i> عرض طلباتي
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Jobs" asp-action="Apply" asp-route-id="@Model.Id" class="btn btn-primary w-100 btn-lg mb-2">
+                                <i class="fas fa-paper-plane me-2"></i> تقدم الآن
+                            </a>
+                            <button onclick="toggleSave(@Model.Id)" class="btn w-100 @(isSaved ? "btn-warning" : "btn-outline-secondary")" id="saveBtn">
+                                <i class="fas fa-bookmark me-1"></i>
+                                <span id="saveBtnText">@(isSaved ? "إزالة من المحفوظات" : "حفظ الوظيفة")</span>
+                            </button>
+                        }
+                    }
+                    else if (User.IsInRole("Employer") || User.IsInRole("Admin"))
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            يجب تسجيل الدخول كباحث عن عمل للتقديم
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 btn-lg mb-2">
+                            <i class="fas fa-sign-in-alt me-2"></i> سجّل دخولك للتقديم
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" asp-route-type="Applicant" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-user-plus me-1"></i> أنشئ حساباً مجانياً
+                        </a>
+                    }
+
+                    <hr>
+                    <div class="small text-muted">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span><i class="fas fa-calendar me-1"></i>تاريخ النشر</span>
+                            <span>@Model.PostedAt.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        @if (Model.ExpiresAt.HasValue)
+                        {
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><i class="fas fa-hourglass me-1"></i>ينتهي في</span>
+                                <span class="@(Model.ExpiresAt < DateTime.Now ? "text-danger" : "text-warning")">@Model.ExpiresAt.Value.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        }
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-eye me-1"></i>المشاهدات</span>
+                            <span>@Model.ViewCount</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-users me-1"></i>المتقدمين</span>
+                            <span>@Model.Applications.Count</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Card -->
+            @if (Model.Employer != null)
+            {
+                <div class="card">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold mb-3">عن الشركة</h6>
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="company-logo" style="width:48px;height:48px;">
+                                @(Model.Employer.CompanyName?.Substring(0, 1)?.ToUpper() ?? "C")
+                            </div>
+                            <div>
+                                <div class="fw-bold">@Model.Employer.CompanyName</div>
+                                @if (!string.IsNullOrEmpty(Model.Employer.Industry))
+                                {
+                                    <div class="text-muted small">@Model.Employer.Industry</div>
+                                }
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Employer.CompanyDescription))
+                        {
+                            <p class="text-muted small">@Model.Employer.CompanyDescription</p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Employer.CompanyWebsite))
+                        {
+                            <a href="@Model.Employer.CompanyWebsite" target="_blank" class="btn btn-sm btn-outline-primary w-100">
+                                <i class="fas fa-globe me-1"></i> زيارة الموقع
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Related Jobs -->
+    @if (related.Any())
+    {
+        <div class="mt-5">
+            <h4 class="fw-bold mb-4">وظائف مشابهة</h4>
+            <div class="row g-3">
+                @foreach (var rj in related)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        @await Html.PartialAsync("_JobCard", rj)
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+async function toggleSave(jobId) {
+    const res = await fetch('/Jobs/ToggleSave', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? ''},
+        body: `jobId=${jobId}`
+    });
+    const data = await res.json();
+    const btn = document.getElementById('saveBtn');
+    const txt = document.getElementById('saveBtnText');
+    if (data.saved) {
+        btn.classList.replace('btn-outline-secondary', 'btn-warning');
+        txt.textContent = 'إزالة من المحفوظات';
+    } else {
+        btn.classList.replace('btn-warning', 'btn-outline-secondary');
+        txt.textContent = 'حفظ الوظيفة';
+    }
+}
+</script>
+@Html.AntiForgeryToken()
+}
